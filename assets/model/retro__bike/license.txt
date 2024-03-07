@@ -1,0 +1,11 @@
+Model Information:
+* title:	Retro  bike
+* source:	https://sketchfab.com/3d-models/retro-bike-d9c4d3b44b2e4e4aa24e360c9830c0a1
+* author:	annzep (https://sketchfab.com/annzep)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Retro  bike" (https://sketchfab.com/3d-models/retro-bike-d9c4d3b44b2e4e4aa24e360c9830c0a1) by annzep (https://sketchfab.com/annzep) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

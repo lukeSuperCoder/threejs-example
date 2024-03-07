@@ -1,0 +1,49 @@
+{
+  "hash": "1e2dc7df",
+  "configHash": "8ab19328",
+  "lockfileHash": "243bc482",
+  "browserHash": "5e8470ef",
+  "optimized": {
+    "three": {
+      "src": "../../node_modules/three/build/three.module.js",
+      "file": "three.js",
+      "fileHash": "19fae5a3",
+      "needsInterop": false
+    },
+    "three/addons/loaders/GLTFLoader.js": {
+      "src": "../../node_modules/three/examples/jsm/loaders/GLTFLoader.js",
+      "file": "three_addons_loaders_GLTFLoader__js.js",
+      "fileHash": "e84352a0",
+      "needsInterop": false
+    },
+    "three/addons/loaders/RGBELoader.js": {
+      "src": "../../node_modules/three/examples/jsm/loaders/RGBELoader.js",
+      "file": "three_addons_loaders_RGBELoader__js.js",
+      "fileHash": "7bfed754",
+      "needsInterop": false
+    },
+    "three/addons/controls/OrbitControls.js": {
+      "src": "../../node_modules/three/examples/jsm/controls/OrbitControls.js",
+      "file": "three_addons_controls_OrbitControls__js.js",
+      "fileHash": "9222a74f",
+      "needsInterop": false
+    },
+    "three/addons/objects/Water.js": {
+      "src": "../../node_modules/three/examples/jsm/objects/Water.js",
+      "file": "three_addons_objects_Water__js.js",
+      "fileHash": "9c812b0a",
+      "needsInterop": false
+    },
+    "three/addons/objects/Sky.js": {
+      "src": "../../node_modules/three/examples/jsm/objects/Sky.js",
+      "file": "three_addons_objects_Sky__js.js",
+      "fileHash": "055f9b6c",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-RGCEAKY7": {
+      "file": "chunk-RGCEAKY7.js"
+    }
+  }
+}
