@@ -51,7 +51,7 @@ heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
 const geometry_shape = new THREE.ShapeGeometry( heartShape );
 
 //球缓冲几何体
-const geometry_sphere = new THREE.SphereGeometry(1, 16, 16);
+const geometry_sphere = new THREE.SphereGeometry(1, 64, 64);
 //圆环缓冲几何体
 const geometry_ring = new THREE.RingGeometry(1,2,16,10);
 //圆环缓冲扭结几何体
@@ -114,7 +114,7 @@ const material_point = new THREE.PointsMaterial( { color: 0x888888 } );
 
 //创建网格模型
 const mesh = new THREE.Mesh(geometry_sphere, material);
-mesh.position.set(1,1,1);
+mesh.position.set(0,0,1);
 
 camera.position.z = 5;
 scene.add(mesh);
@@ -126,7 +126,8 @@ controls.dampingFactor = 0.25; // 阻尼系数
 
 function animate() {
     requestAnimationFrame(animate);
-
+    mesh.rotation.y+=0.1;
+    mesh.rotation.x+=0.1;
     controls.update();
 
     renderer.render(scene, camera);
