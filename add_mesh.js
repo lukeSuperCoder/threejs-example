@@ -111,26 +111,97 @@ geometry_point.setAttribute( 'position', new THREE.Float32BufferAttribute( verti
 
 const material_point = new THREE.PointsMaterial( { color: 0x888888 } );
 
+//MeshLambertMaterial受光照影响
+const material_lam = new THREE.MeshLambertMaterial({
+    // color: 0xffffff,
+    // emissive: 0xff0000, //默认是黑色不可见
+    // emissiveIntensity: 0.5,
+}); 
+
+
 
 //创建网格模型
-const mesh = new THREE.Mesh(geometry_sphere, material);
-mesh.position.set(0,0,1);
+const mesh = new THREE.Mesh(geometry_box, material_lam);
+mesh.position.set(0,0,0);
 
 camera.position.z = 5;
+// camera.lookAt(5,5,5)
 scene.add(mesh);
+
+// AxesHelper：辅助观察的坐标系
+const axesHelper = new THREE.AxesHelper(150);
+scene.add(axesHelper);
+
+//点光源：两个参数分别表示光源颜色和光照强度
+// 参数1：0xffffff是纯白光,表示光源颜色
+// 参数2：1.0,表示光照强度，可以根据需要调整
+const pointLight = new THREE.PointLight(0xffffff, 1.0);
+pointLight.intensity = 100.0;//光照强度
+pointLight.position.set(1, 5, 10);//点光源放在x轴上
+// scene.add(pointLight); //点光源添加到场景中
+
+//平行光
+// 从上方照射的白色平行光，强度为 0.5。
+const directionalLight = new THREE.DirectionalLight( 0xff0000, 1);
+//灯光将投射阴影
+directionalLight.castShadow = true;
+// directionalLight.position.set(5, 10, 5);
+// 对比不同入射角，mesh表面对光照的反射效果
+// directionalLight.position.set(100, 0, 0);
+// directionalLight.position.set(0, 100, 0);
+// directionalLight.position.set(100, 100, 100);
+directionalLight.position.set(100, 60, 50);
+//directionalLight.target默认指向坐标原点
+
+directionalLight.target = mesh;
+scene.add(directionalLight.target);
+scene.add( directionalLight );
+
+
+//半球光
+const hemLight = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+scene.add( hemLight );
+//聚光灯
+const spotLight = new THREE.SpotLight( 0xffffff, 1 );
+spotLight.position.set( 10, 10, 10 );
+// scene.add( spotLight );
+
+
+// DirectionalLightHelper：可视化平行光
+const dirLightHelper = new THREE.DirectionalLightHelper(spotLight, 5,0xff0000);
+scene.add(dirLightHelper);
+
 
 renderer.render(scene, camera);
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // 允许阻尼效果
 controls.dampingFactor = 0.25; // 阻尼系数
 
+// 渲染循环
+const clock = new THREE.Clock();
 function animate() {
     requestAnimationFrame(animate);
-    mesh.rotation.y+=0.1;
-    mesh.rotation.x+=0.1;
+    const spt = clock.getDelta()*1000;//毫秒
+    // console.log('两帧渲染时间间隔(毫秒)',spt);
+    // console.log('帧率FPS',1000/spt);
+    mesh.rotation.y+=0.01;
+    // mesh.rotation.x+=0.1;
     controls.update();
 
     renderer.render(scene, camera);
 }
 
 animate();
+
+// onresize 事件会在窗口被调整大小时发生（自适应）
+window.onresize = function () {
+    // 重置渲染器输出画布canvas尺寸
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    // 全屏情况下：设置观察范围长宽比aspect为窗口宽高比
+    camera.aspect = window.innerWidth / window.innerHeight;
+    // 渲染器执行render方法的时候会读取相机对象的投影矩阵属性projectionMatrix
+    // 但是不会每渲染一帧，就通过相机的属性计算投影矩阵(节约计算资源)
+    // 如果相机的一些属性发生了变化，需要执行updateProjectionMatrix ()方法更新相机的投影矩阵
+    camera.updateProjectionMatrix();
+};
+
