@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+//引入性能监视器stats.js
+import Stats from 'three/addons/libs/stats.module.js';
+
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -9,6 +13,17 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+//创建性能监视器
+//创建stats对象
+const stats = new Stats();
+//stats.domElement:web页面上输出计算结果,一个div元素，
+document.body.appendChild(stats.domElement);
+// stats.domElement显示：渲染帧率  刷新频率,一秒渲染次数 
+stats.setMode(0);//默认模式
+//stats.domElement显示：渲染周期 渲染一帧多长时间(单位：毫秒ms)
+// stats.setMode(1);
+
 
 //创建几何体
 const geometry_box = new THREE.BoxGeometry(1, 1, 1);
@@ -94,6 +109,14 @@ const material_normal = new THREE.MeshNormalMaterial({
     displacementScale: 0.5
 });
 
+// 模拟镜面反射，产生一个高光效果
+const material_phong = new THREE.MeshPhongMaterial({
+    color: 0xffff00,
+    shininess: 200, //高光部分的亮度，默认30
+    specular: 0x444444 //高光部分的颜色
+});
+
+
 const vertices = [];
 
 for ( let i = 0; i < 10000; i ++ ) {
@@ -121,7 +144,7 @@ const material_lam = new THREE.MeshLambertMaterial({
 
 
 //创建网格模型
-const mesh = new THREE.Mesh(geometry_box, material_lam);
+const mesh = new THREE.Mesh(geometry_box, material_phong);
 mesh.position.set(0,0,0);
 
 camera.position.z = 5;
@@ -136,21 +159,21 @@ scene.add(axesHelper);
 // 参数1：0xffffff是纯白光,表示光源颜色
 // 参数2：1.0,表示光照强度，可以根据需要调整
 const pointLight = new THREE.PointLight(0xffffff, 1.0);
-pointLight.intensity = 100.0;//光照强度
-pointLight.position.set(1, 5, 10);//点光源放在x轴上
+pointLight.intensity = 1000.0;//光照强度
+pointLight.position.set(10, 10, 10);//点光源放在x轴上
 // scene.add(pointLight); //点光源添加到场景中
 
 //平行光
 // 从上方照射的白色平行光，强度为 0.5。
-const directionalLight = new THREE.DirectionalLight( 0xff0000, 1);
+const directionalLight = new THREE.DirectionalLight( 0xffffff, 10);
 //灯光将投射阴影
 directionalLight.castShadow = true;
 // directionalLight.position.set(5, 10, 5);
 // 对比不同入射角，mesh表面对光照的反射效果
 // directionalLight.position.set(100, 0, 0);
 // directionalLight.position.set(0, 100, 0);
-// directionalLight.position.set(100, 100, 100);
-directionalLight.position.set(100, 60, 50);
+directionalLight.position.set(100, 100, 100);
+// directionalLight.position.set(100, 60, 50);
 //directionalLight.target默认指向坐标原点
 
 directionalLight.target = mesh;
@@ -160,9 +183,9 @@ scene.add( directionalLight );
 
 //半球光
 const hemLight = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
-scene.add( hemLight );
+// scene.add( hemLight );
 //聚光灯
-const spotLight = new THREE.SpotLight( 0xffffff, 1 );
+const spotLight = new THREE.SpotLight( 0xffffff, 1000 );
 spotLight.position.set( 10, 10, 10 );
 // scene.add( spotLight );
 
@@ -170,6 +193,44 @@ spotLight.position.set( 10, 10, 10 );
 // DirectionalLightHelper：可视化平行光
 const dirLightHelper = new THREE.DirectionalLightHelper(spotLight, 5,0xff0000);
 scene.add(dirLightHelper);
+
+// 随机创建大量的模型,测试渲染性能
+const num = 10000; //控制长方体模型数量
+const num_mesh = [];
+for (let i = 0; i < num; i++) {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const mesh = new THREE.Mesh(geometry, material_lam);
+    // 随机生成长方体xyz坐标
+    const x = (Math.random() - 0.5) * 200
+    const y = (Math.random() - 0.5) * 200
+    const z = (Math.random() - 0.5) * 200
+    mesh.position.set(x, y, z)
+    num_mesh.push(mesh);
+    scene.add(mesh); // 模型对象插入场景中
+}
+
+//阵列立方体和相机适配体验
+
+const geometry_arr1 = new THREE.BoxGeometry(100, 100, 100);
+//材质对象Material
+for (let i = 0; i < 10; i++) {
+    const mesh = new THREE.Mesh(geometry_arr1, material_phong); //网格模型对象Mesh
+    // 沿着x轴分布
+    mesh.position.set(i*200,0,0);
+    scene.add(mesh); //网格模型添加到场景中
+}
+
+//创建一个长方体几何对象Geometry
+const geometry_arr2 = new THREE.BoxGeometry(100, 100, 100);
+//材质对象Material
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+        const mesh = new THREE.Mesh(geometry_arr2, material_phong); //网格模型对象Mesh
+        // 在XOZ平面上分布
+        mesh.position.set(i * 200, 0, j * 200);
+        scene.add(mesh); //网格模型添加到场景中  
+    }
+}
 
 
 renderer.render(scene, camera);
@@ -185,9 +246,11 @@ function animate() {
     // console.log('两帧渲染时间间隔(毫秒)',spt);
     // console.log('帧率FPS',1000/spt);
     mesh.rotation.y+=0.01;
-    // mesh.rotation.x+=0.1;
+    num_mesh.forEach((i) => {
+        i.rotation.y+=0.01;
+    })
     controls.update();
-
+    stats.update();
     renderer.render(scene, camera);
 }
 
