@@ -11,7 +11,10 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x444444, 1); //设置背景颜色
+
 document.body.appendChild(renderer.domElement);
 
 //创建性能监视器
