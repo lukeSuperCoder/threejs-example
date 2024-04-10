@@ -81,7 +81,8 @@ const geometry_wireframe = new THREE.WireframeGeometry(geometry_shape);
 const material = new THREE.MeshBasicMaterial({
     // color: 0x00ffff,
     alphaHash: false,    //启用alphaHash透明度，这是.transparent或.alphaTest的替代方案。如果不透明度低于随机阈值，则不会渲染材质。随机化会引入一些颗粒或噪点，但相较于传统的Alpha blend方式，避免了透明度引起的深度排序问题。使用TAARenderPass可以有效减少噪点。
-    opacity: 0.8,
+    // opacity: 0.8,
+    side: THREE.DoubleSide, //两面可见
     transparent: true,
     alphaToCoverage: false,  //启用 alpha 覆盖。 只能与启用 MSAA 的上下文一起使用（意味着在创建渲染器时将抗锯齿参数 antialias 设置为 true）。 启用此选项将平滑剪裁平面边缘和 alphaTest 剪辑边缘上的锯齿。 默认值为 false。
     blendAlpha: 0.01,
@@ -147,7 +148,7 @@ const material_lam = new THREE.MeshLambertMaterial({
 
 
 //创建网格模型
-const mesh = new THREE.Mesh(geometry_box, material_phong);
+const mesh = new THREE.Mesh(geometry_box, material);
 mesh.position.set(0,0,0);
 
 camera.position.z = 5;

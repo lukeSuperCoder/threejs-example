@@ -16,6 +16,7 @@ document.body.appendChild(renderer.domElement);
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
+// cube.scale.z  = 2;
 scene.add(cube);
 
 const light = new THREE.AmbientLight(0xffffff,1);
