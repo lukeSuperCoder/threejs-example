@@ -9,7 +9,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshLambertMaterial({ color: 0x00ffff, transparent: true });
+const material = new THREE.MeshLambertMaterial({  });
 camera.position.z = 5;
 let mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
@@ -23,14 +23,14 @@ scene.add(mesh_circle);
 //纹理贴图加载器TextureLoader
 const texLoader = new THREE.TextureLoader();
 // .load()方法加载图像，返回一个纹理对象Texture
-const texture = texLoader.load('./assets/model/textures/water.jpg');
+const texture = texLoader.load('./assets/model/textures/brick_diffuse.jpg');
 material.map = texture;
 
 // 设置阵列模式
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 // uv两个方向纹理重复数量
-texture.repeat.set(12,12);//注意选择合适的阵列数量
+// texture.repeat.set(12,12);//注意选择合适的阵列数量
 
 // 旋转矩形平面
 mesh_circle.rotateX(-Math.PI/2);
@@ -49,7 +49,7 @@ controls.enableDamping = true; // 允许阻尼效果
 controls.dampingFactor = 0.25; // 阻尼系数
 
 function animate() {
-    texture.offset.x +=0.01;//设置纹理动画：偏移量根据纹理和动画需要，设置合适的值
+    texture.offset.x +=0.001;//设置纹理动画：偏移量根据纹理和动画需要，设置合适的值
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
