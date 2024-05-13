@@ -8,6 +8,10 @@ let camera, scene, renderer;
 
 init();
 
+// setTimeout(() => {
+// 	saveFile();
+// }, 3000);
+
 function init() {
 
 	const container = document.createElement( 'div' );
@@ -91,7 +95,12 @@ function init() {
 		} );
 
 		
-	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer = new THREE.WebGLRenderer({ 
+		antialias: true,
+		alpha: true,
+		//想把canvas画布上内容下载到本地，需要设置为true
+    	preserveDrawingBuffer:true,
+ 	});
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -127,4 +136,14 @@ function render() {
 
 	renderer.render( scene, camera );
 
+}
+
+//保存图片
+function saveFile() {
+    const link = document.createElement('a');
+	// 通过超链接herf属性，设置要保存到文件中的数据
+	const canvas = renderer.domElement; //获取canvas对象
+	link.href = canvas.toDataURL("image/png");
+	link.download = 'threejs.png'; //下载文件名
+    link.click(); //js代码触发超链接元素a的鼠标点击事件，开始下载文件到本地
 }
