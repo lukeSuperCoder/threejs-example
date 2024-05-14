@@ -1,6 +1,10 @@
 //主要学习gui相关
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// 引入CSS2渲染器CSS2DRenderer和CSS2模型对象CSS2DObject
+import { CSS2DRenderer,CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+// 引入CSS3渲染器CSS3DRenderer
+import {CSS3DRenderer, CSS3DObject} from 'three/addons/renderers/CSS3DRenderer.js';
 
 
 const scene = new THREE.Scene();
@@ -92,6 +96,24 @@ geometry_circle.setFromPoints(pcurve.getPoints(1000));
 let pmesh1 = new THREE.Line(geometry_circle, material);
 scene.add(pmesh1);
 
+//html标签展示
+const div = document.getElementById('tag');
+// HTML元素转化为threejs的CSS2模型对象
+const tag = new CSS3DObject(div);
+console.log(tag);
+tag.position.set(0,1,0);
+scene.add(tag);
+const css2Renderer = new CSS3DRenderer();
+// width, height：canvas画布宽高度
+css2Renderer.setSize(window.innerWidth, window.innerHeight);
+// HTML标签<div id="tag"></div>外面父元素叠加到canvas画布上且重合
+css2Renderer.domElement.style.fontSize = '0.5px';
+css2Renderer.domElement.style.position = 'absolute';
+css2Renderer.domElement.style.top = '0px';
+//设置.pointerEvents=none，解决HTML元素标签对threejs canvas画布鼠标事件的遮挡
+css2Renderer.domElement.style.pointerEvents = 'none';
+document.body.appendChild(css2Renderer.domElement);
+
 // 添加一个辅助网格地面
 const gridHelper = new THREE.GridHelper(300, 25, 0x004444, 0x004444);
 scene.add(gridHelper);
@@ -99,10 +121,54 @@ scene.add(gridHelper);
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // 允许阻尼效果
 controls.dampingFactor = 0.25; // 阻尼系数
-
+let t = 0;
+let R = 100;
+let i = 0;
+const pointsArr = curve.getPoints(1000);
 function animate() {
+    // t += 0.01;
+    // camera.position.x = R*Math.cos(t);
+    // camera.position.z = R*Math.sin(t);
+    // camera.lookAt(0,0,0);
+    //管道漫游案例
+    // if (i < pointsArr.length - 1) {
+    //     // 相机位置设置在当前点位置
+    //     camera.position.copy(pointsArr[i]);
+    //     // 曲线上当前点pointsArr[i]和下一个点pointsArr[i+1]近似模拟当前点曲线切线
+    //     // 设置相机观察点为当前点的下一个点，相机视线和当前点曲线切线重合
+    //     camera.lookAt(pointsArr[i + 1]);
+    //     i += 1; //调节速度
+    // } else {
+    //     i = 0
+    // }
     requestAnimationFrame(animate);
+    css2Renderer.render(scene, camera);
     renderer.render(scene, camera);
 }
+//利用射线 Raycaster实现(鼠标点击选中模型)
+renderer.domElement.addEventListener('click', function (event) {
+    // .offsetY、.offsetX以canvas画布左上角为坐标原点,单位px
+    const px = event.offsetX;
+    const py = event.offsetY;
+    //屏幕坐标px、py转WebGL标准设备坐标x、y
+    //width、height表示canvas画布宽高度
+    const x = (px / window.innerWidth) * 2 - 1;
+    const y = -(py / window.innerHeight) * 2 + 1;
+    //创建一个射线投射器`Raycaster`
+    const raycaster = new THREE.Raycaster();
+    //.setFromCamera()计算射线投射器`Raycaster`的射线属性.ray
+    // 形象点说就是在点击位置创建一条射线，射线穿过的模型代表选中
+    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+    //.intersectObjects([mesh1, mesh2, mesh3])对参数中的网格模型对象进行射线交叉计算
+    // 未选中对象返回空数组[],选中一个对象，数组1个元素，选中两个对象，数组两个元素
+    const intersects = raycaster.intersectObjects([mesh, mesh1, mesh2, mesh3]);
+    console.log("射线器返回的对象", intersects);
+    // intersects.length大于0说明，说明选中了模型
+    if (intersects.length > 0) {
+        // 选中模型的第一个模型，设置为红色
+        intersects[0].object.material.color.set(0xff0000);
+    }
+})
+
 
 animate();
