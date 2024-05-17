@@ -84,6 +84,8 @@ loader.load( 'Horse.glb', async function ( gltf ) {
     //  获取gltf.animations[0]的第一个clip动画对象
     clipAction = mixer.clipAction(gltf.animations[0]); //创建动画clipAction对象
     clipAction.play(); //播放动画
+    clipAction.setEffectiveTimeScale(5);    // 调整动画速度
+    console.log('clipAction',clipAction);
     // 递归遍历所有模型节点批量修改材质
     gltf.scene.traverse(function(obj) {
         if (obj.isMesh) {//判断是否是网格模型
@@ -178,6 +180,10 @@ gui.add(Bone2.rotation, 'x', 0, Math.PI / 3).name('关节2');
 const clock = new THREE.Clock();
 function animate() {
     composer.render();
+    if(clipAction) {
+        //阻尼效果 逐渐减速直到停止
+        // clipAction.setEffectiveTimeScale(clipAction.timeScale*0.995);
+    }
     TWEEN.update();//tween更新
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
@@ -256,6 +262,8 @@ function createCameraTween(endPos,endTarget){
     .onUpdate(function (obj) {
         // 动态改变相机位置
         camera.position.set(obj.x, obj.y, obj.z);
+        // camera.position.set(0, 1.6, -2.3);//第三人称
+        camera.position.set(0, 1.6, -5);//第一人称
         // 动态计算相机视线
         // camera.lookAt(obj.tx, obj.ty, obj.tz);
         controls.target.set(obj.tx, obj.ty, obj.tz);
@@ -264,5 +272,9 @@ function createCameraTween(endPos,endTarget){
     .start()
     .easing(TWEEN.Easing.Quadratic.Out);//使用二次缓动函数;
 }
-
+document.addEventListener('mousemove', (event) => {
+    // 注意rotation.y += 与 -= 区别，左右旋转时候方向相反
+    //event.movementX缩小一定倍数改变旋转控制的灵敏度
+    model.rotation.y -= event.movementX / 600;
+});
 animate();
