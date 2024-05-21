@@ -31,7 +31,18 @@ const body = new CANNON.Body({
     material: sphereMaterial
 });
 
+//物理正方体
+const boxShape = new CANNON.Box(new CANNON.Vec3(10, 10, 10));
+const bodyBox = new CANNON.Body({
+    mass: 0.3, // 碰撞体质量0.3kg
+    position: new CANNON.Vec3(0, 1, 0), // 位置
+    shape: boxShape,
+    material: sphereMaterial
+});
+
 body.position.y = 50;
+bodyBox.position.set(50,50,0);
+// world.addBody(bodyBox);
 // world.addBody(body);
 
 // 物理地面
@@ -48,6 +59,8 @@ world.addBody(groundBody)
 // 改变平面默认的方向，法线默认沿着z轴，旋转到平面向上朝着y方向
 //旋转规律类似threejs 平面
 body.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+bodyBox.quaternion.setFromEuler(Math.PI / 3, Math.PI / 3, Math.PI / 3);
+
 
 const contactMaterial = new CANNON.ContactMaterial(groundMaterial, sphereMaterial, {
     restitution: 0.7, //反弹恢复系数
@@ -66,8 +79,18 @@ const material = new THREE.MeshLambertMaterial({
     color: 0xff0000,
 });
 const mesh = new THREE.Mesh(geometry, material);
-mesh.position.y = 1;
+mesh.name = 'Sphere';
+mesh.position.y = 50;
 scene.add(mesh);
+
+//网格盒子
+const boxGeometry = new THREE.BoxGeometry(10, 10, 10);
+const meshBox = new THREE.Mesh(boxGeometry, material);
+meshBox.name = 'Box';
+meshBox.position.set(50,50,0);
+meshBox.rotation.set(Math.PI / 3, Math.PI / 3, Math.PI / 3);
+scene.add(meshBox);
+
 
 // 网格地面
 const planeGeometry = new THREE.PlaneGeometry(500, 500);
@@ -113,22 +136,29 @@ renderer.domElement.addEventListener('click', function (event) {
     raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
     //.intersectObjects([mesh1, mesh2, mesh3])对参数中的网格模型对象进行射线交叉计算
     // 未选中对象返回空数组[],选中一个对象，数组1个元素，选中两个对象，数组两个元素
-    const intersects = raycaster.intersectObjects([mesh]);
+    const intersects = raycaster.intersectObjects([mesh,meshBox]);
     console.log("射线器返回的对象", intersects);
     // intersects.length大于0说明，说明选中了模型
     if (intersects.length > 0) {
-        body.position.y = 50;//点击按钮，body回到下落的初始位置
-        // 选中模型的第一个模型，开始下落
-        world.addBody(body);
+        if(intersects[0].object.name === "Sphere") {
+            body.position.y = 50;//点击按钮，body回到下落的初始位置
+            // 选中模型的第一个模型，开始下落
+            world.addBody(body);
+        } else if(intersects[0].object.name === "Box") {
+            bodyBox.position.y = 50;//点击按钮，body回到下落的初始位置
+            // 选中模型的第一个模型，开始下落
+            world.addBody(bodyBox);
+        } 
+        
     }
 })
 const audio = new Audio('./assets/model/video/peng.mp3');
 body.addEventListener('collide', (event) => {
-    console.log('碰撞事件', event);
+    // console.log('碰撞事件', event);
     const contact = event.contact;
     //获得沿法线的冲击速度
     const ImpactV = contact.getImpactVelocityAlongNormal();
-    console.log('ImpactV', ImpactV/350);
+    // console.log('ImpactV', ImpactV/350);
     // 碰撞越狠，声音越大
     //4.5比ImpactV最大值吕略微大一点，这样音量范围0~1
     audio.volume = ImpactV / 350;
@@ -139,6 +169,8 @@ body.addEventListener('collide', (event) => {
 function render() {
     world.step(1/60);//更新物理计算
     mesh.position.copy(body.position);  //渲染循环中，同步物理球body与网格球mesh的位置
+    meshBox.position.copy(bodyBox.position);  //渲染循环中，同步物理球body与网格球mesh的位置
+    meshBox.quaternion.copy(bodyBox.quaternion);   //同步姿态角度
     requestAnimationFrame(render);
     renderer.render(scene, camera);
 }
