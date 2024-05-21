@@ -203,7 +203,6 @@ function animate() {
 }
 function render() {
 	renderer.render( scene, camera );
-
 }
 
 //利用射线 Raycaster实现(鼠标点击选中模型)
