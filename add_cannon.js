@@ -48,14 +48,14 @@ bodyBox.position.set(50,50,0);
 const loader = new GLTFLoader();
 var meshModel = null;
 var bodyModel = null;
-loader.setPath( './assets/model/glb_model/');
-loader.load('dices.glb', async function ( gltf ) {
+loader.setPath( './assets/model/gltf/Nefertiti/');
+loader.load('Nefertiti.glb', async function ( gltf ) {
         // 骨骼辅助显示
         const skeletonHelper = new THREE.SkeletonHelper(gltf.scene);
         scene.add(skeletonHelper);
         meshModel = gltf.scene;//获取箱子网格模型
-        meshModel.position.set(100,100,100);
-        meshModel.scale.set(10,10,10);
+        meshModel.position.set(100,50,0);
+        // meshModel.scale.set(10,10,10);
         scene.add(meshModel);
         //包围盒计算
         const box3 = new THREE.Box3();
@@ -66,11 +66,11 @@ loader.load('dices.glb', async function ( gltf ) {
         // 物理箱子
         bodyModel = new CANNON.Body({
             mass: 0.3, // 碰撞体质量0.3kg
-            position: new CANNON.Vec3(100,100,100), // 位置
-            shape: new CANNON.Box(new CANNON.Vec3(size.x/3, size.y/3, size.z/3)),
+            position: new CANNON.Vec3(100,50,0), // 位置
+            shape: new CANNON.Box(new CANNON.Vec3(size.x/2, size.y/2, size.z/2)),
             material: sphereMaterial
         });
-        bodyModel.quaternion.setFromEuler(Math.PI / 3, Math.PI / 3, Math.PI / 3);
+        // bodyModel.quaternion.setFromEuler(Math.PI / 3, Math.PI / 3, Math.PI / 3);
 
         // world.addBody(bodyModel);
 })
@@ -182,7 +182,7 @@ renderer.domElement.addEventListener('click', function (event) {
             // 选中模型的第一个模型，开始下落
             world.addBody(bodyBox);
         }  else{
-            bodyModel.position.y = 100;//点击按钮，body回到下落的初始位置
+            bodyModel.position.y = 50;//点击按钮，body回到下落的初始位置
             // 选中模型的第一个模型，开始下落
             world.addBody(bodyModel);
         } 
