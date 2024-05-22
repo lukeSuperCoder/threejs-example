@@ -1,8 +1,7 @@
 import * as CANNON from "cannon-es";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-console.log('CANNON', CANNON.World);
-
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -44,6 +43,40 @@ body.position.y = 50;
 bodyBox.position.set(50,50,0);
 // world.addBody(bodyBox);
 // world.addBody(body);
+
+//gltf模型
+const loader = new GLTFLoader();
+var meshModel = null;
+var bodyModel = null;
+loader.setPath( './assets/model/glb_model/');
+loader.load('dices.glb', async function ( gltf ) {
+        // 骨骼辅助显示
+        const skeletonHelper = new THREE.SkeletonHelper(gltf.scene);
+        scene.add(skeletonHelper);
+        meshModel = gltf.scene;//获取箱子网格模型
+        meshModel.position.set(100,100,100);
+        meshModel.scale.set(10,10,10);
+        scene.add(meshModel);
+        //包围盒计算
+        const box3 = new THREE.Box3();
+        box3.expandByObject(meshModel);//计算模型包围盒
+        const size = new THREE.Vector3();
+        box3.getSize(size);//包围盒计算箱子的尺寸
+        //物理对应模型
+        // 物理箱子
+        bodyModel = new CANNON.Body({
+            mass: 0.3, // 碰撞体质量0.3kg
+            position: new CANNON.Vec3(100,100,100), // 位置
+            shape: new CANNON.Box(new CANNON.Vec3(size.x/3, size.y/3, size.z/3)),
+            material: sphereMaterial
+        });
+        bodyModel.quaternion.setFromEuler(Math.PI / 3, Math.PI / 3, Math.PI / 3);
+
+        // world.addBody(bodyModel);
+})
+
+
+
 
 // 物理地面
 const groundMaterial = new CANNON.Material()
@@ -136,7 +169,7 @@ renderer.domElement.addEventListener('click', function (event) {
     raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
     //.intersectObjects([mesh1, mesh2, mesh3])对参数中的网格模型对象进行射线交叉计算
     // 未选中对象返回空数组[],选中一个对象，数组1个元素，选中两个对象，数组两个元素
-    const intersects = raycaster.intersectObjects([mesh,meshBox]);
+    const intersects = raycaster.intersectObjects([mesh,meshBox,meshModel]);
     console.log("射线器返回的对象", intersects);
     // intersects.length大于0说明，说明选中了模型
     if (intersects.length > 0) {
@@ -148,6 +181,10 @@ renderer.domElement.addEventListener('click', function (event) {
             bodyBox.position.y = 50;//点击按钮，body回到下落的初始位置
             // 选中模型的第一个模型，开始下落
             world.addBody(bodyBox);
+        }  else{
+            bodyModel.position.y = 100;//点击按钮，body回到下落的初始位置
+            // 选中模型的第一个模型，开始下落
+            world.addBody(bodyModel);
         } 
         
     }
@@ -171,6 +208,10 @@ function render() {
     mesh.position.copy(body.position);  //渲染循环中，同步物理球body与网格球mesh的位置
     meshBox.position.copy(bodyBox.position);  //渲染循环中，同步物理球body与网格球mesh的位置
     meshBox.quaternion.copy(bodyBox.quaternion);   //同步姿态角度
+    if(meshModel && bodyModel) {
+        meshModel.position.copy(bodyModel.position);  //渲染循环中，同步物理球body与网格球mesh的位置
+        meshModel.quaternion.copy(bodyModel.quaternion);   //同步姿态角度
+    }
     requestAnimationFrame(render);
     renderer.render(scene, camera);
 }
